@@ -8,13 +8,13 @@ Un workflow n8n qui lit des flux RSS chaque matin, filtre les articles pertinent
 
 ```mermaid
 flowchart TD
-    A1[Déclencheur horaire 7h] --> B[Liste des sources]
-    A2[Déclenchement manuel] --> B
+    A1[Horaire 7h] --> B[Liste des sources]
+    A2[Manuel] --> B
     B --> C[Lecture RSS]
     C --> D[Filtre date]
     D --> E[Filtre pertinence]
     E --> F[Regroupement]
-    F --> G[Résumé par Gemini]
+    F --> G[Résumé IA]
     G --> H[Envoi Discord]
     C -. en cas d'erreur .-> I[Alerte source]
     style I fill:#ffe0cc,stroke:#cc6600
@@ -57,7 +57,7 @@ La clé du modèle est stockée dans les credentials chiffrés de n8n. L'URL du 
 
 ## Faire tourner le workflow
 
-Le fichier `workflows/veille.json` ne contient aucun secret. Trois éléments sont donc à recréer localement.
+Le fichier `workflows/veille.json` ne contient aucun secret. La configuration est donc à recréer localement.
 
 1. **Installer n8n** et le lancer sur `localhost:5678`.
 2. **Importer le workflow** depuis l'interface, menu *Import from file*.
