@@ -27,3 +27,20 @@ Chaque matin à 7h, le workflow lit deux flux RSS d'actualité tech. Les article
 Les articles retenus sont regroupés en un seul bloc de texte, envoyé à un modèle de langage qui produit un paragraphe de tendance et sélectionne trois articles à lire. Le résultat part sur un salon Discord via un webhook.
 
 Si une source ne répond pas, le workflow ne s'arrête pas : les autres sources continuent leur chemin, et un message d'alerte signale la source défaillante.
+
+## Choix techniques
+
+**Les sources sont des données, pas des nœuds.**
+Plutôt qu'un nœud de lecture RSS par source, un nœud de code renvoie une liste d'URL que le nœud RSS consomme une par une. Ajouter une source revient à ajouter une ligne, sans toucher à la structure du workflow.
+
+**Envoi via HTTP Request plutôt que le nœud Discord.**
+n8n propose un nœud Discord prêt à l'emploi. Construire la requête à la main oblige à comprendre ce qui est réellement envoyé : méthode POST, corps au format JSON, webhook comme destination. Le nœud aurait masqué exactement ce que le projet cherchait à apprendre.
+
+**Deux filtres séparés plutôt qu'une condition unique.**
+Le filtre de date et le filtre de pertinence sont deux nœuds distincts. Chacun a une responsabilité unique, ce qui permet de voir combien d'articles chaque étape écarte, et de modifier l'un sans risquer de casser l'autre.
+
+**Gemini en palier gratuit.**
+Le modèle est appelé une fois par jour, bien en deçà des quotas gratuits. Les données traitées sont des titres d'articles publics, donc la contrepartie d'usage du palier gratuit est sans conséquence ici.
+
+**Aucun secret dans le dépôt.**
+La clé du modèle est stockée dans les credentials chiffrés de n8n. L'URL du webhook Discord est lue depuis une variable d'environnement. Le fichier JSON exporté ne contient que des références, jamais les valeurs.
