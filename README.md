@@ -44,3 +44,13 @@ Le modèle est appelé une fois par jour, bien en deçà des quotas gratuits. Le
 
 **Aucun secret dans le dépôt.**
 La clé du modèle est stockée dans les credentials chiffrés de n8n. L'URL du webhook Discord est lue depuis une variable d'environnement. Le fichier JSON exporté ne contient que des références, jamais les valeurs.
+
+## Limites connues
+
+**Exécution locale.** n8n tourne sur une machine personnelle. Si elle est éteinte ou en veille à 7h, l'exécution n'a pas lieu et n'est pas reportée. Un hébergement permanent résoudrait le problème, pour un coût mensuel jugé disproportionné au regard de l'usage.
+
+**Pas de déduplication.** Un article déjà envoyé peut réapparaître le lendemain tant qu'il reste dans la fenêtre de sept jours. La correction demande de mémoriser les liens déjà traités, ce qui suppose une base de données. Le besoin est identifié, la solution est reportée.
+
+**Surveillance partielle des erreurs.** Une source RSS injoignable déclenche une alerte sur Discord. Une panne du modèle de langage ou de l'envoi Discord, en revanche, échoue en silence.
+
+**Résumé à partir des titres.** Le workflow ne lit que les titres et les liens fournis par les flux RSS, pas le contenu des articles. Le résumé reflète donc ce que les titres annoncent, pas ce que les articles contiennent.
