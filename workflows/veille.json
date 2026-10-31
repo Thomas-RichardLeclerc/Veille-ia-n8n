@@ -1,0 +1,430 @@
+{
+  "name": "Veille IA",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "603abc43-d32c-40ca-a74b-6c1a52ff780f",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        0
+      ],
+      "id": "12e07473-35c7-4370-b89c-a148054542e5",
+      "name": "RSS Read",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "08ed28fa-c730-43c7-8e0a-2c186b04d017",
+              "name": "lignedigest",
+              "value": "=[{{ $json.title }}]({{ $json.link }})",
+              "type": "string"
+            },
+            {
+              "id": "e8399f83-ef03-4f0a-a0c5-f2f6fd870158",
+              "name": "source",
+              "value": "={{ $('Code in JavaScript').item.json.nom }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        512,
+        0
+      ],
+      "id": "f55fdee7-984b-4f4b-9a9f-0471630b8815",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { url: \"https://www.lesnumeriques.com/intelligence-artificielle/rss.xml\", nom: \"Les Numériques\" } },\n  { json: { url: \"https://www.frandroid.com/culture-tech/intelligence-artificielle/feed\", nom: \"Frandroid\" } }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        0
+      ],
+      "id": "c7e4b9b2-7a8a-4c23-90d9-f62e8feae722",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "lignedigest"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "3e4e8e0f-4133-4332-ba08-5f345e19ba6a",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "accb5ba6-325b-4155-ac06-9b58b238d830",
+              "name": "corpsMessage",
+              "value": "={{ $json.lignedigest.join('\\n\\n') }}",
+              "type": "string"
+            },
+            {
+              "id": "91d6fa95-c425-47f9-8e00-d29b66ed6225",
+              "name": "taille",
+              "value": "={{ $json.lignedigest.join('\\n\\n').length() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "8c1ef0c2-5044-423e-97d6-bc509da271ff",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "2bfac42c-c126-4172-939f-d5a1629bbd5f",
+              "leftValue": "={{ $json.pubDate }}",
+              "rightValue": "={{ $now.minus(7, 'days') }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.4,
+      "position": [
+        656,
+        0
+      ],
+      "id": "bf85e344-acc8-4e3f-97a0-5cb81cab65b9",
+      "name": "Filtre date"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "180a1027-40d9-474c-9a89-dc6d223b40e8",
+              "leftValue": "={{ $json.link }}",
+              "rightValue": "/intelligence-artificielle/",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "ac0dd554-0aaf-44d9-a0a4-c70926483e98",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "IA|Claude|Gemini|Copilot|OpenAI|ChatGPT|Grok|Mistral|Anthropic",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.4,
+      "position": [
+        800,
+        0
+      ],
+      "id": "9d3d4ec9-1ede-4669-89f7-ac580a1b43f8",
+      "name": "Filtre pertinence"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $json.content.parts[0].text.slice(0, 1990) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1952,
+        0
+      ],
+      "id": "22bdb9ef-4fee-4ee7-83b3-a27aec631dc6",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Voici les titres d'articles sur l'IA publiés cette semaine, au format Markdown [titre](url) :\n\n{{ $json.corpsMessage }}\n\nRédige un digest en français, 1200 caractères maximum :\n\n1. Un paragraphe qui dégage la tendance générale de la semaine à partir de l'ensemble des articles.\n\n2. Puis \"À lire :\" suivi de 3 articles, un par ligne, en lien Markdown cliquable suivi d'une phrase expliquant ce qu'il apporte.\n\nCritère de sélection, dans cet ordre :\n- Priorité aux annonces concrètes : nouveau modèle, nouvel outil, nouvelle capacité technique, résultat mesurable.\n- À défaut, un article sur le coût, l'infrastructure ou la régulation de l'IA.\n- Écarte les faits divers, les opinions et les articles sans élément nouveau.\n\nConserve les liens à l'identique, n'en invente aucun."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        1616,
+        0
+      ],
+      "id": "57e34989-ec93-4468-b6d3-6b9a85a20106",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FzRQ10YQ064Ska1f",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=content",
+              "value": "=⚠️ Veille IA : le flux {{ $json.nom }} n'a pas répondu."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        576,
+        208
+      ],
+      "id": "f0f1b4f6-95ca-4914-807c-de563e086c9a",
+      "name": "Alerte source"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        -128
+      ],
+      "id": "9eb694df-f905-4414-883b-735f51bb0047",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alerte source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Filtre date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtre date": {
+      "main": [
+        [
+          {
+            "node": "Filtre pertinence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtre pertinence": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "63a499f8-3878-40c5-af00-91c8ba2fde4e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a99ee8864f08547b94e3fc8d6917fa2c226523d432f31aa43253eaf6f0b62d0b"
+  },
+  "nodeGroups": [],
+  "id": "pFUnCxc7sUTqhX52",
+  "tags": []
+}
