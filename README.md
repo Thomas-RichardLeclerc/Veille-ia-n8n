@@ -54,3 +54,14 @@ La clé du modèle est stockée dans les credentials chiffrés de n8n. L'URL du 
 **Surveillance partielle des erreurs.** Une source RSS injoignable déclenche une alerte sur Discord. Une panne du modèle de langage ou de l'envoi Discord, en revanche, échoue en silence.
 
 **Résumé à partir des titres.** Le workflow ne lit que les titres et les liens fournis par les flux RSS, pas le contenu des articles. Le résumé reflète donc ce que les titres annoncent, pas ce que les articles contiennent.
+
+## Faire tourner le workflow
+
+Le fichier `workflows/veille.json` ne contient aucun secret. Trois éléments sont donc à recréer localement.
+
+1. **Installer n8n** et le lancer sur `localhost:5678`.
+2. **Importer le workflow** depuis l'interface, menu *Import from file*.
+3. **Créer une clé d'API Gemini** sur Google AI Studio, et l'enregistrer dans les credentials n8n du nœud correspondant.
+4. **Créer un webhook Discord** dans les paramètres du salon de destination, puis exposer son URL dans une variable d'environnement nommée `DISCORD_WEBHOOK` avant de démarrer n8n.
+5. **Autoriser la lecture des variables d'environnement** par les nœuds, n8n la bloquant par défaut, via `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`.
+6. **Publier le workflow** pour que le déclencheur horaire devienne actif. Tant qu'il reste en brouillon, seul le déclenchement manuel fonctionne.
